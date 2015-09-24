@@ -1,0 +1,16 @@
+[
+{
+  "modid": "SecondFactor",
+  "name": "Twilio Second Factor",
+  "description": "A mod that increases the security of your Minecraft logins to your server.",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["Simon Thorpe"],
+  "credits": "The Forge and FML guys for making awesome Minecraft modding capabilities.",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]
