@@ -57,17 +57,18 @@ public class AuthyRegisterUser extends CommandBase {
 		if (argStrings.length > 0 && argStrings.length < 4) {
 			// Check to see if user is already registered by looking at their extended properties.
             ExtendedPlayer props = (ExtendedPlayer) player.getExtendedProperties(ExtendedPlayer.EXT_PROP_NAME);
-
-            props.setPlayerEmail(argStrings[0]);
-            props.setAuthyCell(argStrings[1]);
-            props.setAuthyCountryCode(argStrings[2]);
-
+            
+            // TODO: Need to wrap the Authy call in a try/catch and only store on player if we get a successful registration.
             // Register the user with Authy.
 			Authy authyAPI = new Authy();
 			String authyID = authyAPI.registerAuthyUser(argStrings[1], argStrings[2], argStrings[0]);
 			
-			// Store the AuthyID on the user.
+			// Store the Authy information on the user.
 			props.setAuthyID(authyID);
+            props.setPlayerEmail(argStrings[0]);
+            props.setAuthyCell(argStrings[1]);
+            props.setAuthyCountryCode(argStrings[2]);
+            props.setAuthySuccessDate(null);			// User has registered, BUT never gone through 2FA step.
 			
 			// Communicate to the user they now need to pass in the Authy code to continue login.
 			player.addChatComponentMessage(new ChatComponentText("You are now registered! To continue login you must /atcode"));

@@ -18,12 +18,15 @@ import net.minecraft.init.Blocks;
 
 public class SecondFactor
 {
+	// TODO: Detect if Minecraft server is in offline mode (online-mode=false in server.properties) then totally disable this mod. 
+	// TODO: Create a good Readme to go with mod to explain how to setup Authy. OR maybe add a URL into code to a doc on authy.com?
+	
     //Set the ID of the mod (Should be lower case).
     public static final String MODID = "secondfactor";
     //Set the "Name" of the mod.
     public static final String MODNAME = "Authy Second Factor (2FA) Mod";
     //Set the version of the mod.
-    public static final String MODVER = "0.0.2";
+    public static final String MODVER = "0.0.3";
 
     @Instance(value = SecondFactor.MODID) // Tell Forge what instance to use.
     public static SecondFactor instance;

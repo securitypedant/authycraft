@@ -1,5 +1,6 @@
 package com.authycraft.secondFactor;
 
+import java.time.Instant;
 import java.util.Date;
 
 import net.minecraft.entity.Entity;
@@ -24,14 +25,18 @@ public class ExtendedPlayer implements IExtendedEntityProperties {
 	*/
 	public ExtendedPlayer(EntityPlayer player)
 	{
+		// TODO: Do I need to worry that this constructor might be overwriting stored values?
 		this.player = player;
 		this.authyCell = "";
 		this.playerEmail = "";
-		this.authyID = "";
-		this.authySuccessDate = new Date();
-		this.playerAwaitingAuthy = false;
-		this.authyCountryCode = "1"; // Default to US for the country of the phone number.
+		this.authyID = "";						
+		this.authySuccessDate = null;			// By default user has never successfully completed 2FA phase.
+		this.playerAwaitingAuthy = false;		// By default player is not enforced to perform 2FA.
+		this.authyCountryCode = "1"; 			// Default to US for the country of the phone number.
 	}
+	
+	//Date now = new Date().;
+	//Instant iNow = new Instant().;
 	
 	/**
 	* Used to register these extended properties for the player during EntityConstructing event
@@ -51,23 +56,28 @@ public class ExtendedPlayer implements IExtendedEntityProperties {
 		return (ExtendedPlayer) player.getExtendedProperties(EXT_PROP_NAME);
 	}
 	
-	// Save Twilio user data on the Minecraft user
+	// Save Authy user data on the Minecraft user
 	@Override
 	public void saveNBTData(NBTTagCompound compound)
 	{
 		// We need to create a new tag compound that will save everything for our Extended Properties
 		NBTTagCompound properties = new NBTTagCompound();
 
-		// Store the Twilio cell number and player email
+		// Store the Authy cell number and player email
 		properties.setString("AuthyCell", this.authyCell);
 		properties.setString("PlayerEmail", this.playerEmail);
 		properties.setString("AuthyCountryCode", this.authyCountryCode);
 		properties.setString("AuthyID", this.authyID);
-		
+		// Store the date as milliseconds since Jan 1st 1970 because the properties class cannot store dates.
+		if (this.authySuccessDate == null) {
+			properties.setLong("AuthyLast2FASuccess", 0);
+		} else {
+			properties.setLong("AuthyLast2FASuccess", this.authySuccessDate.getTime());
+		}		
 		compound.setTag(EXT_PROP_NAME, properties);
 	}
 	
-	// Load Twilio user data on the Minecraft user
+	// Load Authy user data on the Minecraft user
 	@Override
 	public void loadNBTData(NBTTagCompound compound)
 	{
@@ -78,8 +88,14 @@ public class ExtendedPlayer implements IExtendedEntityProperties {
 		this.playerEmail = properties.getString("PlayerEmail");
 		this.authyCountryCode = properties.getString("AuthyCountryCode");
 		this.authyID = properties.getString("AuthyID");
-
-		// Just so you know it's working, add this line:
+		// Get the data stored as a long and initialize new date.
+		if (properties.getLong("AuthyLast2FASuccess") == 0) {
+			this.authySuccessDate = null;
+		} else {
+			this.authySuccessDate = new Date(properties.getLong("AuthyLast2FASuccess"));
+		}
+		
+		// Dump to console the information for a loaded user.
 		System.out.println("[AUTHY CRAFT] Loaded Authy data, cell: " + this.authyCell + " CC:" + this.authyCountryCode + " email:" + this.playerEmail + " authyID:" + this.authyID);
 	}
 
@@ -107,7 +123,7 @@ public class ExtendedPlayer implements IExtendedEntityProperties {
 		return this.authyID;
 	}
 	
-	public Date getauthySuccessDate () {
+	public Date getAuthySuccessDate () {
 		// Get the date of the last successful Authy auth.
 		return this.authySuccessDate;
 	}
@@ -156,7 +172,7 @@ public class ExtendedPlayer implements IExtendedEntityProperties {
 	 *  Set the date when the last successful 2FA activity occurred.
 	 * @param date
 	 */
-	public void setauthySuccessDate (Date date) {
+	public void setAuthySuccessDate (Date date) {
 		// Set the players last successful Authy auth date.
 		this.authySuccessDate = date;
 	}

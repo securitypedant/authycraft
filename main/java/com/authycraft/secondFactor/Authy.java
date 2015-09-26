@@ -8,9 +8,11 @@ import com.authy.api.*;
 import com.authy.api.Error;
 
 public class Authy {
+	// TODO: Need better error handling and ensure we respect configAuthyFailSecure.
+	// Get Authy connection information from config file.
+	// String authyAPIKEY = configAuthyAPIKey;
 	
-	// TODO: Need to get the API key and maybe URL from a config file instead.
-	AuthyApiClient client = new AuthyApiClient("ULYctV0ujuNyQK6GbWlVJGZwvn5GuCh6", "https://api.authy.com/");
+	AuthyApiClient client = new AuthyApiClient(CommonProxy.AUTHYAPIKEY, CommonProxy.AUTHYAPIURL);
 	// Maybe only invoke these when needed? What's the cost of creation?
 	Users users = client.getUsers();
 	Tokens tokens = client.getTokens();
@@ -32,12 +34,10 @@ public class Authy {
 			strAuthyID = Integer.toString(user.getId());
 			System.out.println(strAuthyID);
 		} else {
-			// Something must have gone wrong.
+			// Something must have gone wrong. Need better error handling here.
 			Error error = user.getError();
 			System.out.println(error.getMessage());
 		}
-	
-		// TODO: Need to examine the return. What information do we get?
 		return strAuthyID;
 	}
 	
