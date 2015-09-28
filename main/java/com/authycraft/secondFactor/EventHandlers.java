@@ -19,6 +19,7 @@ import net.minecraft.util.ChatComponentText;
 import net.minecraftforge.event.entity.EntityEvent.EntityConstructing;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
+import net.minecraft.entity.player.EntityPlayerMP;
 
 public class EventHandlers {
 	
@@ -39,9 +40,10 @@ public class EventHandlers {
 			
 			// If the player has no Authy data, continue to keep them in place.
 			// Do we need to do this? Is this use case covered in initial login? Or does the player tick fire even before the player login?
-			if (props.getAuthyCell() == "") {
+			// Also when we have this code run, it can interfere with the AuthyCode class which returns a valid code and sets the AwaitingAuthy to false.
+			/*if (!props.getAuthyCell().equals("")) {
 				props.setPlayerAwaitingAuthy(true);
-			}
+			}*/
 			
 			// Wrap all the logic for if we are waiting on an Authy code into a big if.
 			if (props.getPlayerAwaitingAuthy()) {
@@ -49,15 +51,16 @@ public class EventHandlers {
 				if (event.player.ticksExisted > (CommonProxy.AUTHY2FATIMEOUT * 20)) {
 					// Disconnect player.
 					// TODO: How do we correctly disconnect the player?
+					((EntityPlayerMP) event.player).playerNetServerHandler.kickPlayerFromServer("You didn't complete the Authy second factor in time.");
 					System.out.println("Player '" + event.player.getDisplayName() + "' didn't respond to Authy 2FA in time,(" + (event.player.ticksExisted / 20) + " seconds) being disconnected.");
 				}
-				
+
 				// If we are still waiting for player to run /atcode, let's remind them every 10 seconds.
 				if (event.player.ticksExisted > CommonProxy.Authy2FAReminderTicksCount) {
 					// Increment the count of ticks by another 100 ticks/10 seconds
 					CommonProxy.Authy2FAReminderTicksCount = CommonProxy.Authy2FAReminderTicksCount + 300;
 					// If the player needs to perform the second factor.
-					if (props.getAuthyCell() != "") {
+					if (!props.getAuthyCell().equals("")) {
 						// Communicate to the user they need to run the command to tell us the Authy code.
 						event.player.addChatComponentMessage(new ChatComponentText("You need to pass Authy second factor, please run /atcode"));
 					}
@@ -96,7 +99,7 @@ public class EventHandlers {
 
 		// Determine how server is supposed to enforce 2FA, and deterine if player fits into that enforcement model.
 		// TODO: Add in ForgeEssentials permission model. Allow more than just OPS, allow any FE group to be used.
-		if (CommonProxy.AUTHYAPPLYTOGROUP == "OPS") {
+		if (CommonProxy.AUTHYAPPLYTOGROUP.equals("OPS")) {
 			// Only users who are OPS need to go through the 2FA step.
 			Boolean bPlayerOp = MinecraftServer.getServer().getConfigurationManager().func_152596_g(event.player.getGameProfile());
 			if (bPlayerOp) {
@@ -104,7 +107,7 @@ public class EventHandlers {
 			} else {
 				bEnforce2FA = false;	// This player is not an OP, 2FA will be ignored.
 			}
-		} else if (CommonProxy.AUTHYAPPLYTOGROUP == "ALL") {
+		} else if (CommonProxy.AUTHYAPPLYTOGROUP.equals("ALL")) {
 			// EVERYONE must pass the 2FA step!
 			bEnforce2FA = true; 
 		} else {
@@ -124,7 +127,7 @@ public class EventHandlers {
 			System.out.println("[AUTHY CRAFT] captured player position, X=" + props.getLoginPosX() + " Y=" + props.getLoginPosY() + " Z=" + props.getLoginPosZ());
 			
 			// Has the user ever registered with Authy?
-			if (props.getAuthyCell() == "") {
+			if (props.getAuthyCell().equals("")) {
 				// USER NOT REGISTERED.
 				// No evidence the user has ever registered. We need them to run the /atreg command first.
 				// TODO: Replace command with client GUI to capture information.

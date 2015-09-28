@@ -53,7 +53,7 @@ public class AuthyCode extends CommandBase {
 			if (argStrings.length > 0 && argStrings.length < 2) {
 				// Check to see if user is already registered by looking at their extended properties.
 	            ExtendedPlayer props = (ExtendedPlayer) player.getExtendedProperties(ExtendedPlayer.EXT_PROP_NAME);
-	            if (props.getAuthyCell() != "") {
+	            if (!props.getAuthyCell().equals("")) {
 		            String strAuthyID = props.getAuthyID();		// If they are registered, we should have a valid AuthyID stored.
 		          
 		            // Validate token with Authy.
@@ -66,6 +66,7 @@ public class AuthyCode extends CommandBase {
 						props.setPlayerAwaitingAuthy(false);
 						// Set the time/date the user successfully passed the 2FA. This is used to determine 2FA session period.
 						props.setAuthySuccessDate(new Date());
+						System.out.println("[AUTHY CRAFT] Player " + player.getDisplayName() + " passsed 2FA on " + props.getAuthySuccessDate());
 						
 					} else {
 						player.addChatComponentMessage(new ChatComponentText("Authy authentication failed :("));
