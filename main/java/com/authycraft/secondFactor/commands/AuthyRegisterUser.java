@@ -3,7 +3,7 @@ package com.authycraft.secondFactor.commands;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.authycraft.secondFactor.Authy;
+import com.authycraft.secondFactor.AuthyAPI;
 import com.authycraft.secondFactor.ExtendedPlayer;
 
 import net.minecraft.command.ICommand;
@@ -60,7 +60,7 @@ public class AuthyRegisterUser extends CommandBase {
             
             // TODO: Need to wrap the Authy call in a try/catch and only store on player if we get a successful registration.
             // Register the user with Authy.
-			Authy authyAPI = new Authy();
+			AuthyAPI authyAPI = new AuthyAPI();
 			String authyID = authyAPI.registerAuthyUser(argStrings[1], argStrings[2], argStrings[0]);
 			
 			// Store the Authy information on the user.

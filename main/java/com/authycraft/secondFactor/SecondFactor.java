@@ -1,7 +1,10 @@
 package com.authycraft.secondFactor;
 
-import com.authycraft.secondFactor.commands.AuthyCode;
+import com.authycraft.secondFactor.commands.AuthyVerify;
+import com.authycraft.secondFactor.commands.AuthyAdmin;
+import com.authycraft.secondFactor.commands.AuthyPush;
 import com.authycraft.secondFactor.commands.AuthyRegisterUser;
+import com.authycraft.secondFactor.commands.AuthyRequestToken;
 
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.EventHandler;
@@ -58,7 +61,10 @@ public class SecondFactor
     @EventHandler
     public void serverLoad(FMLServerStartingEvent event)
     {
-      event.registerServerCommand(new AuthyCode());
+      event.registerServerCommand(new AuthyVerify());
       event.registerServerCommand(new AuthyRegisterUser());
+      event.registerServerCommand(new AuthyAdmin());
+      event.registerServerCommand(new AuthyRequestToken());
+      event.registerServerCommand(new AuthyPush());
     }
 }

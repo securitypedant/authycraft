@@ -1,17 +1,21 @@
 package com.authycraft.secondFactor;
 
+import java.io.IOException;
 import java.util.Calendar;
 import java.util.Date;
 
 import com.authy.AuthyApiClient;
 import com.authy.api.Tokens;
 import com.authy.api.Users;
+import com.authycraft.secondFactor.net.AuthyREST;
+import com.authycraft.secondFactor.net.AuthyShow2FAGuiPacket;
 
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.PlayerEvent;
 import cpw.mods.fml.common.gameevent.PlayerEvent.PlayerRespawnEvent;
 import cpw.mods.fml.common.gameevent.TickEvent;
 import cpw.mods.fml.common.gameevent.TickEvent.Phase;
+import cpw.mods.fml.relauncher.Side;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.server.MinecraftServer;
@@ -46,7 +50,28 @@ public class EventHandlers {
 			}*/
 			
 			// Wrap all the logic for if we are waiting on an Authy code into a big if.
+			
 			if (props.getPlayerAwaitingAuthy()) {
+				AuthyREST authyRest = new AuthyREST();
+				if (!props.getpushRequestUUID().toLowerCase().equals("")) {
+					try {
+						// Look for an outstanding push notification...
+						props.setPushRequestStatus(authyRest.getNotify(props.getpushRequestUUID(), CommonProxy.AUTHYAPIKEY));
+					} catch (IOException e) {
+					
+					}	
+				}
+	
+				// If player has just passed an Authy push notification.
+				if (props.getPushRequestStatus().toLowerCase().equals("approved")) {
+					// Close the GUI and let them in...
+					props.setPlayerAwaitingAuthy(false);
+					props.setPushRequestStatus("");
+					props.setpushRequestUUID("");
+					proxy.network.sendTo(new AuthyShow2FAGuiPacket(0), (EntityPlayerMP) event.player);
+					System.out.println("Status of player push request: " + props.getPushRequestStatus());
+				}
+				
 				// If player has taken too long to provide the 2FA response, kick them off the server!
 				if (event.player.ticksExisted > (CommonProxy.AUTHY2FATIMEOUT * 20)) {
 					// Disconnect player.
@@ -96,6 +121,8 @@ public class EventHandlers {
 		boolean bEnforce2FA = CommonProxy.AUTHYFAILSECURE; // Default if 2FA enforced based on fail safe config.
 		// Get extended properties for all players. It's is from here we know if a user has registered yet with Authy.
 		ExtendedPlayer props = ExtendedPlayer.get((EntityPlayer) event.player);
+		props.setPushRequestStatus("");
+		props.setpushRequestUUID("");
 
 		// Determine how server is supposed to enforce 2FA, and deterine if player fits into that enforcement model.
 		// TODO: Add in ForgeEssentials permission model. Allow more than just OPS, allow any FE group to be used.
@@ -156,7 +183,10 @@ public class EventHandlers {
 					props.setPlayerAwaitingAuthy(false);
 				}
 			}
-		}					
+		}	
+		// Use the network to tell the client to open the Gui
+		proxy.network.sendTo(new AuthyShow2FAGuiPacket(1), (EntityPlayerMP) event.player);
+		
 		// Send to the console information on the user logging in. 
 		System.out.println("[AUTHY CRAFT] " + event.player.getDisplayName() + " email = " + props.getPlayerEmail() + " AuthyCell = " + props.getAuthyCell());		
 	}

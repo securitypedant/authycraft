@@ -3,7 +3,12 @@ package com.authycraft.secondFactor;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.authycraft.secondFactor.item.AuthyDoor;
+import com.authycraft.secondFactor.door.AuthyDoorItem;
+import com.authycraft.secondFactor.gui.AuthyGuiHandler;
+import com.authycraft.secondFactor.net.AuthyReqPushPacket;
+import com.authycraft.secondFactor.net.AuthyReqSMSPacket;
+import com.authycraft.secondFactor.net.AuthyShow2FAGuiPacket;
+import com.authycraft.secondFactor.net.AuthyVerifyPacket;
 
 import cpw.mods.fml.common.FMLCommonHandler;
 //import cpw.mods.fml.common.SidedProxy;
@@ -11,6 +16,10 @@ import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.network.IGuiHandler;
+import cpw.mods.fml.common.network.NetworkRegistry;
+import cpw.mods.fml.common.network.simpleimpl.MessageContext;
+import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
+import cpw.mods.fml.relauncher.Side;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
@@ -18,8 +27,27 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.config.Property;
 
-
-public class CommonProxy implements IGuiHandler{
+public class CommonProxy {
+	
+	public EntityPlayer getPlayerFromMessageContext(MessageContext ctx)
+    {
+        switch(ctx.side)
+        {
+            case CLIENT:
+            {
+                assert false : "Message for CLIENT received on dedicated server";
+            }
+            case SERVER:
+            {
+                EntityPlayer entityPlayerMP = ctx.getServerHandler().playerEntity;
+                return entityPlayerMP;
+            }
+            default:
+                assert false : "Invalid side in TestMsgHandler: " + ctx.side;
+        }
+        return null;
+    }
+	
 	/** Used to store IExtendedEntityProperties data temporarily between player death and respawn */
 	private static final Map<String, NBTTagCompound> extendedEntityData = new HashMap<String, NBTTagCompound>();
 	
@@ -32,17 +60,9 @@ public class CommonProxy implements IGuiHandler{
 	
 	EventHandlers events = new EventHandlers();
 	
-	@Override
-    public Object getServerGuiElement(int guiId, EntityPlayer player, World world, int x, int y, int z)
-    {
-		return null;
-    }
-
-    @Override
-    public Object getClientGuiElement(int guiId, EntityPlayer player, World world, int x, int y, int z)
-    {
-    	return null;
-    }
+	// Create an instance of the network wrapper for communication between client and server.
+	// public static SimpleNetworkWrapper network;
+	public static SimpleNetworkWrapper network = NetworkRegistry.INSTANCE.newSimpleChannel(SecondFactor.MODID.toLowerCase());
     
 	public void preInit(FMLPreInitializationEvent e) {
         // TODO: Need to test for Authy API Java helper library. Or do we build it into our code?
@@ -51,6 +71,15 @@ public class CommonProxy implements IGuiHandler{
 		FMLCommonHandler.instance().bus().register(events);
 		MinecraftForge.EVENT_BUS.register(events);
 		
+        // Setup network channels for packets.
+		network.registerMessage(AuthyReqSMSPacket.AuthyReqSMSPacketHandler.class, AuthyReqSMSPacket.class, 0, Side.SERVER);
+		network.registerMessage(AuthyReqPushPacket.AuthyReqPushPacketHandler.class, AuthyReqPushPacket.class, 1, Side.SERVER);
+		network.registerMessage(AuthyVerifyPacket.AuthyVerifyPacketHandler.class, AuthyVerifyPacket.class, 2, Side.SERVER);
+		network.registerMessage(AuthyShow2FAGuiPacket.AuthyShow2FAGuiPacketHandler.class, AuthyShow2FAGuiPacket.class, 3, Side.CLIENT);
+		
+		// TODO: Move this into another class, making the proxy messy.
+		// C O N F I G  F I L E  S E T U P
+		// ------------------------------------------------------------------------------------------------------------
         // Setup the config file that will be in .minecraft/config/ and it will be named secondFactor.cfg
         Configuration config = new Configuration(e.getSuggestedConfigurationFile());
 		
@@ -90,13 +119,15 @@ public class CommonProxy implements IGuiHandler{
         AUTHYFAILSECURE = configAuthyFailSecure.getBoolean();
         
         // Save the configuration to its file
-        config.save();        
+        config.save();
         
 		// AuthyDoor.init();
     }
 
+	
+	
     public void init(FMLInitializationEvent e) {
-
+    	NetworkRegistry.INSTANCE.registerGuiHandler(SecondFactor.instance, new AuthyGuiHandler());
     }
 
     public void postInit(FMLPostInitializationEvent e) {

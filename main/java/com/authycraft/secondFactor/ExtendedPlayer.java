@@ -14,7 +14,7 @@ public class ExtendedPlayer implements IExtendedEntityProperties {
 	private final EntityPlayer player;
 	
 	// These variables are what we will be adding to the player data profile.
-	private String authyCell, authyCountryCode, playerEmail, authyID;
+	private String authyCell, authyCountryCode, playerEmail, authyID, pushRequestUUID, pushRequestStatus;
 	private Date authySuccessDate;
 	private Boolean playerAwaitingAuthy;
 	private Double loginPosX, loginPosY, loginPosZ;
@@ -68,6 +68,8 @@ public class ExtendedPlayer implements IExtendedEntityProperties {
 		properties.setString("PlayerEmail", this.playerEmail);
 		properties.setString("AuthyCountryCode", this.authyCountryCode);
 		properties.setString("AuthyID", this.authyID);
+		properties.setString("AuthyPushRequestUUID", this.pushRequestUUID);
+		properties.setString("AuthyPushRequestStatus", this.pushRequestStatus);
 		// Store the date as milliseconds since Jan 1st 1970 because the properties class cannot store dates.
 		if (this.authySuccessDate == null) {
 			properties.setLong("AuthyLast2FASuccess", 0);
@@ -88,6 +90,8 @@ public class ExtendedPlayer implements IExtendedEntityProperties {
 		this.playerEmail = properties.getString("PlayerEmail");
 		this.authyCountryCode = properties.getString("AuthyCountryCode");
 		this.authyID = properties.getString("AuthyID");
+		this.pushRequestUUID = properties.getString("AuthyPushRequestUUID");
+		this.pushRequestStatus = properties.getString("AuthyPushRequestStatus");
 		// Get the data stored as a long and initialize new date.
 		if (properties.getLong("AuthyLast2FASuccess") == 0) {
 			this.authySuccessDate = null;
@@ -148,6 +152,15 @@ public class ExtendedPlayer implements IExtendedEntityProperties {
 		return this.loginPosZ;
 	}
 	
+	public String getpushRequestUUID() {
+		// Return the last UUID of a successful Authy push notification request.
+		return this.pushRequestUUID;
+	}
+	public String getPushRequestStatus() {
+		// Return if the last push notification check has succeeded.
+		return this.pushRequestStatus;
+	}
+	
 	public void setAuthyCell (String cell){
 		// Set the Authy cell number.
 		this.authyCell = cell;
@@ -195,5 +208,14 @@ public class ExtendedPlayer implements IExtendedEntityProperties {
 	public void setLoginPosZ (Double positionZ) {
 		// Set the players initial login Z position
 		this.loginPosZ = positionZ;
+	}
+	
+	public void setpushRequestUUID (String pushRequestUUID) {
+		// Set the players last successful Authy push notification UUID;
+		this.pushRequestUUID = pushRequestUUID;
+	}
+	public void setPushRequestStatus (String pushRequestStatus) {
+		// Set the players last Authy push notification status;
+		this.pushRequestStatus = pushRequestStatus;
 	}
 }

@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import com.authycraft.secondFactor.Authy;
+import com.authycraft.secondFactor.AuthyAPI;
 import com.authycraft.secondFactor.ExtendedPlayer;
 
 import net.minecraft.command.ICommand;
@@ -14,28 +14,28 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.IChatComponent;
 
-public class AuthyCode extends CommandBase {
+public class AuthyRequestToken extends CommandBase {
 	
 	private List aliases;
 	private IChatComponent chatcomp;
 	
-	public AuthyCode ()
+	public AuthyRequestToken ()
 	  {
 	    this.aliases = new ArrayList();
-	    this.aliases.add("atcode");
-	    this.aliases.add("authycode");
+	    this.aliases.add("atreqt");
+	    this.aliases.add("authyrequesttoken");
 	  }
 
 	  @Override
 	  public String getCommandName()
 	  {
-	    return "Authy SMS code response";
+	    return "Authy token request";
 	  }
 
 	  @Override
 	  public String getCommandUsage(ICommandSender icommandsender)
 	  {
-	    return "atcode 123456";
+	    return "atreqt 123456";
 	  }
 
 	  @Override
@@ -58,9 +58,9 @@ public class AuthyCode extends CommandBase {
 		          
 		            // Validate token with Authy.
 		            // TODO: Ideally put a try around this to catch any problems with communicating to Authy.
-					Authy authyAPI = new Authy();
+					AuthyAPI authyAPI = new AuthyAPI();
 					boolean tokenSuccess = authyAPI.validateAuthyToken(argStrings[0], strAuthyID);
-					
+	
 					if (tokenSuccess) {
 						player.addChatComponentMessage(new ChatComponentText("Authy authentication success!"));
 						props.setPlayerAwaitingAuthy(false);
