@@ -42,7 +42,7 @@ public class CommonProxy {
         {
             case CLIENT:
             {
-                assert false : "Message for CLIENT received on dedicated server";
+            	throw new IllegalArgumentException("Message for CLIENT received on dedicated server");
             }
             case SERVER:
             {
@@ -50,7 +50,7 @@ public class CommonProxy {
                 return entityPlayerMP;
             }
             default:
-                assert false : "Invalid side in TestMsgHandler: " + ctx.side;
+            	throw new IllegalArgumentException("Invalid side in TestMsgHandler: " + ctx.side);
         }
         return null;
     }
