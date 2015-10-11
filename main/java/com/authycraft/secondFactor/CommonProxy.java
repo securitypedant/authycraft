@@ -3,6 +3,7 @@ package com.authycraft.secondFactor;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.authycraft.secondFactor.door.AuthyDoorBlock;
 import com.authycraft.secondFactor.door.AuthyDoorItem;
 import com.authycraft.secondFactor.gui.AuthyGuiHandler;
 import com.authycraft.secondFactor.net.AuthyReqPushPacket;
@@ -19,8 +20,13 @@ import cpw.mods.fml.common.network.IGuiHandler;
 import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
+import cpw.mods.fml.common.registry.GameRegistry;
+import cpw.mods.fml.common.registry.LanguageRegistry;
 import cpw.mods.fml.relauncher.Side;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
+import net.minecraft.init.Items;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
@@ -31,6 +37,7 @@ public class CommonProxy {
 	
 	public EntityPlayer getPlayerFromMessageContext(MessageContext ctx)
     {
+		// This method is designed to be called from a server side packet handler. By running in the common proxy, we avoid casting issues.
         switch(ctx.side)
         {
             case CLIENT:
@@ -65,7 +72,15 @@ public class CommonProxy {
 	public static SimpleNetworkWrapper network = NetworkRegistry.INSTANCE.newSimpleChannel(SecondFactor.MODID.toLowerCase());
     
 	public void preInit(FMLPreInitializationEvent e) {
-        // TODO: Need to test for Authy API Java helper library. Or do we build it into our code?
+	   	// Setup the Authy door item and block.
+		AuthyDoorItem AuthyDoorItem = new AuthyDoorItem();
+		AuthyDoorBlock AuthyDoorBlock = new AuthyDoorBlock();
+    	GameRegistry.registerItem(AuthyDoorItem, "Authy Secured Door item");
+    	GameRegistry.addRecipe(new ItemStack(AuthyDoorItem.authyDoor), new Object[] {"RC","CR","II",'R', Items.redstone, 'C', Items.clay_ball, 'I', Blocks.iron_bars} );
+ 		LanguageRegistry.addName(AuthyDoorItem, "Authy Secured Door");
+ 		GameRegistry.registerBlock(AuthyDoorBlock, "Authy Secured Door block");
+ 		
+		// TODO: Need to test for Authy API Java helper library. Or do we build it into our code?
 		
 		// Register on the events bus so that we can capture events for us to interact with.
 		FMLCommonHandler.instance().bus().register(events);
@@ -128,6 +143,8 @@ public class CommonProxy {
 	
     public void init(FMLInitializationEvent e) {
     	NetworkRegistry.INSTANCE.registerGuiHandler(SecondFactor.instance, new AuthyGuiHandler());
+    	
+    	
     }
 
     public void postInit(FMLPostInitializationEvent e) {

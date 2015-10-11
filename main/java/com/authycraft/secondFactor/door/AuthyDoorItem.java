@@ -1,20 +1,28 @@
 package com.authycraft.secondFactor.door;
 
+import com.authycraft.secondFactor.CommonProxy;
 import com.authycraft.secondFactor.SecondFactor;
 
 import cpw.mods.fml.common.registry.GameRegistry;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockDoor;
 import net.minecraft.block.material.Material;
+import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemDoor;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.MathHelper;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.World;
 
 public class AuthyDoorItem extends ItemDoor {
-	
-	/*
-	 *  Notes for things to do 
+	/*  Notes for things to do 
 	 *  
 	 *  A door is both a block and an item. We need to create two classes. One to address the block and one for item.
 	 *  There is a BlockDoor and an ItemDoor.
@@ -36,22 +44,55 @@ public class AuthyDoorItem extends ItemDoor {
 	 *  
 	 */
 	
+	public static CommonProxy proxy = new CommonProxy();
+	public static ItemDoor authyDoor;
+	// public BlockDoor = proxy.;
+	
 	public AuthyDoorItem() {
+		// Setup defaults
 		super(Material.iron);
+		this.maxStackSize = 1;
+		setUnlocalizedName("Authy Secured Door");
+		setTextureName("authycraft" + ":door_authy");
+        setCreativeTab(CreativeTabs.tabRedstone);
 	}
 	
-	public static ItemDoor authyDoor;
+   @Override
+   @SideOnly(Side.CLIENT)
+   public void registerIcons(IIconRegister iconRegister)
+   {
+           this.itemIcon = iconRegister.registerIcon("authycraft" + ":door_authy");
+   }
 	
-
+   /**
+    * Callback for item usage. If the item does something special on right clicking, he will have one of those. Return
+    * True if something happen and false if it don't. This is for ITEMS, not BLOCKS
+    */
+   @Override
+	public boolean onItemUse(ItemStack stack, EntityPlayer par2EntityPlayer, World worldIn, int x, int y, int z, int side, float hitX, float hitY, float hitZ) {
+		if (side != 1) {
+			return false;
+		} else {
+			++y;
+			Block block = this.AuthyDoorBlock;
+			if (par2EntityPlayer.canPlayerEdit(x, y, z, side, stack)
+					&& par2EntityPlayer.canPlayerEdit(x, y + 1, z, side, stack)) {
+				if (!block.canPlaceBlockAt(worldIn, x, y, z)) {
+					return false;
+				} else {
+					int i1 = MathHelper.floor_double((double) ((par2EntityPlayer.rotationYaw + 180.0F) * 4.0F / 360.0F) - 0.5D) & 3;
+					AuthyDoorItem.placeDoorBlock(worldIn, x, y, z, i1, block);
+					--stack.stackSize;
+					return true;
+				}
+			} else {
+				return false;
+			}
+			
+			
+			
+			
+		}
+	}
 	
-	public static final void init() {
-
-	//	authyDoor = new ItemDoor().setUnlocalizedName("Authy Secured Door").setCreativeTab(CreativeTabs.tabRedstone);
-		GameRegistry.registerItem(authyDoor, "Authy Secured Door");
-		GameRegistry.addRecipe(new ItemStack(AuthyDoorItem.authyDoor), new Object[] {"RC","CR","II",'R', Items.redstone, 'C', Items.clay_ball, 'I', Blocks.iron_bars} );
-		
-		// .setTextureName("/assets/minecraft/textures/items/door_wood.png")
-		//GameRegistry.addRecipe(new ItemStack(Items.iron_pickaxe), new Object[] {"###", " I ", " I ", '#', Items.iron_ingot, 'I', Items.stick});
-		//GameRegistry.addRecipe(new ItemStack(ModBlocks.tutorialBlock), new Object[] {"##", "##", '#', ModItems.tutorialItem});
-    }
 }
