@@ -52,7 +52,6 @@ public class CommonProxy {
             default:
             	throw new IllegalArgumentException("Invalid side in TestMsgHandler: " + ctx.side);
         }
-        return null;
     }
 	
 	/** Used to store IExtendedEntityProperties data temporarily between player death and respawn */
@@ -75,11 +74,11 @@ public class CommonProxy {
 	   	// Setup the Authy door item and block.
 		AuthyDoorItem AuthyDoorItem = new AuthyDoorItem();
 		AuthyDoorBlock AuthyDoorBlock = new AuthyDoorBlock();
-    	GameRegistry.registerItem(AuthyDoorItem, "Authy Secured Door item");
+    	GameRegistry.registerItem(AuthyDoorItem, "Authy_Secured_Door_item");
     	GameRegistry.addRecipe(new ItemStack(AuthyDoorItem.authyDoor), new Object[] {"RC","CR","II",'R', Items.redstone, 'C', Items.clay_ball, 'I', Blocks.iron_bars} );
  		LanguageRegistry.addName(AuthyDoorItem, "Authy Secured Door");
- 		GameRegistry.registerBlock(AuthyDoorBlock, "Authy Secured Door block");
- 		
+ 		GameRegistry.registerBlock(AuthyDoorBlock, "Authy_Secured_Door_block");
+
 		// TODO: Need to test for Authy API Java helper library. Or do we build it into our code?
 		
 		// Register on the events bus so that we can capture events for us to interact with.

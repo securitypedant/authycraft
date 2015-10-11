@@ -46,7 +46,7 @@ public class AuthyDoorItem extends ItemDoor {
 	
 	public static CommonProxy proxy = new CommonProxy();
 	public static ItemDoor authyDoor;
-	// public BlockDoor = proxy.;
+	public BlockDoor AuthyDoorBlock;
 	
 	public AuthyDoorItem() {
 		// Setup defaults
@@ -74,7 +74,7 @@ public class AuthyDoorItem extends ItemDoor {
 			return false;
 		} else {
 			++y;
-			Block block = this.AuthyDoorBlock;
+			Block block = AuthyDoorBlock;
 			if (par2EntityPlayer.canPlayerEdit(x, y, z, side, stack)
 					&& par2EntityPlayer.canPlayerEdit(x, y + 1, z, side, stack)) {
 				if (!block.canPlaceBlockAt(worldIn, x, y, z)) {
