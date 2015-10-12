@@ -7,7 +7,7 @@ import com.authycraft.secondFactor.door.AuthyDoorBlock;
 import com.authycraft.secondFactor.door.AuthyDoorItem;
 import com.authycraft.secondFactor.gui.AuthyGuiHandler;
 import com.authycraft.secondFactor.net.AuthyReqPushPacket;
-import com.authycraft.secondFactor.net.AuthyReqSMSPacket;
+import com.authycraft.secondFactor.net.AuthyReqTokenPacket;
 import com.authycraft.secondFactor.net.AuthyShow2FAGuiPacket;
 import com.authycraft.secondFactor.net.AuthyVerifyPacket;
 
@@ -69,11 +69,12 @@ public class CommonProxy {
 	// Create an instance of the network wrapper for communication between client and server.
 	// public static SimpleNetworkWrapper network;
 	public static SimpleNetworkWrapper network = NetworkRegistry.INSTANCE.newSimpleChannel(SecondFactor.MODID.toLowerCase());
+	// Create my Authy door objects.
+	public static AuthyDoorItem AuthyDoorItem = new AuthyDoorItem();
+	public static AuthyDoorBlock AuthyDoorBlock = new AuthyDoorBlock();
     
 	public void preInit(FMLPreInitializationEvent e) {
 	   	// Setup the Authy door item and block.
-		AuthyDoorItem AuthyDoorItem = new AuthyDoorItem();
-		AuthyDoorBlock AuthyDoorBlock = new AuthyDoorBlock();
     	GameRegistry.registerItem(AuthyDoorItem, "Authy_Secured_Door_item");
     	GameRegistry.addRecipe(new ItemStack(AuthyDoorItem.authyDoor), new Object[] {"RC","CR","II",'R', Items.redstone, 'C', Items.clay_ball, 'I', Blocks.iron_bars} );
  		LanguageRegistry.addName(AuthyDoorItem, "Authy Secured Door");
@@ -86,7 +87,7 @@ public class CommonProxy {
 		MinecraftForge.EVENT_BUS.register(events);
 		
         // Setup network channels for packets.
-		network.registerMessage(AuthyReqSMSPacket.AuthyReqSMSPacketHandler.class, AuthyReqSMSPacket.class, 0, Side.SERVER);
+		network.registerMessage(AuthyReqTokenPacket.AuthyReqTokenPacketHandler.class, AuthyReqTokenPacket.class, 0, Side.SERVER);
 		network.registerMessage(AuthyReqPushPacket.AuthyReqPushPacketHandler.class, AuthyReqPushPacket.class, 1, Side.SERVER);
 		network.registerMessage(AuthyVerifyPacket.AuthyVerifyPacketHandler.class, AuthyVerifyPacket.class, 2, Side.SERVER);
 		network.registerMessage(AuthyShow2FAGuiPacket.AuthyShow2FAGuiPacketHandler.class, AuthyShow2FAGuiPacket.class, 3, Side.CLIENT);
@@ -142,8 +143,7 @@ public class CommonProxy {
 	
     public void init(FMLInitializationEvent e) {
     	NetworkRegistry.INSTANCE.registerGuiHandler(SecondFactor.instance, new AuthyGuiHandler());
-    	
-    	
+
     }
 
     public void postInit(FMLPostInitializationEvent e) {

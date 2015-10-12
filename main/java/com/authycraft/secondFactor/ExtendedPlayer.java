@@ -18,6 +18,7 @@ public class ExtendedPlayer implements IExtendedEntityProperties {
 	private Date authySuccessDate;
 	private Boolean playerAwaitingAuthy;
 	private Double loginPosX, loginPosY, loginPosZ;
+	private int[] authySecuredDoorLocation;
 	
 	/*
 	The default constructor takes no arguments, but I put in the Entity so I can initialize the above variable 'player'
@@ -33,6 +34,9 @@ public class ExtendedPlayer implements IExtendedEntityProperties {
 		this.authySuccessDate = null;			// By default user has never successfully completed 2FA phase.
 		this.playerAwaitingAuthy = false;		// By default player is not enforced to perform 2FA.
 		this.authyCountryCode = "1"; 			// Default to US for the country of the phone number.
+		this.authySecuredDoorLocation = new int[] {0};
+		this.pushRequestUUID = "";
+		this.pushRequestStatus = "";
 	}
 	
 	//Date now = new Date().;
@@ -70,6 +74,7 @@ public class ExtendedPlayer implements IExtendedEntityProperties {
 		properties.setString("AuthyID", this.authyID);
 		properties.setString("AuthyPushRequestUUID", this.pushRequestUUID);
 		properties.setString("AuthyPushRequestStatus", this.pushRequestStatus);
+		properties.setIntArray("AuthySecuredDoorLocation", this.authySecuredDoorLocation);
 		// Store the date as milliseconds since Jan 1st 1970 because the properties class cannot store dates.
 		if (this.authySuccessDate == null) {
 			properties.setLong("AuthyLast2FASuccess", 0);
@@ -92,6 +97,7 @@ public class ExtendedPlayer implements IExtendedEntityProperties {
 		this.authyID = properties.getString("AuthyID");
 		this.pushRequestUUID = properties.getString("AuthyPushRequestUUID");
 		this.pushRequestStatus = properties.getString("AuthyPushRequestStatus");
+		this.authySecuredDoorLocation = properties.getIntArray("AuthySecuredDoorLocation");
 		// Get the data stored as a long and initialize new date.
 		if (properties.getLong("AuthyLast2FASuccess") == 0) {
 			this.authySuccessDate = null;
@@ -161,6 +167,11 @@ public class ExtendedPlayer implements IExtendedEntityProperties {
 		return this.pushRequestStatus;
 	}
 	
+	public int[] getAuthySecuredDoorLocation() {
+		// Return if the last push notification check has succeeded.
+		return this.authySecuredDoorLocation;
+	}
+	
 	public void setAuthyCell (String cell){
 		// Set the Authy cell number.
 		this.authyCell = cell;
@@ -214,8 +225,15 @@ public class ExtendedPlayer implements IExtendedEntityProperties {
 		// Set the players last successful Authy push notification UUID;
 		this.pushRequestUUID = pushRequestUUID;
 	}
+	
 	public void setPushRequestStatus (String pushRequestStatus) {
 		// Set the players last Authy push notification status;
 		this.pushRequestStatus = pushRequestStatus;
 	}
+	
+	public void setAuthySecuredDoorLocation (int[] authySecuredDoorLocation) {
+		// Set the players last Authy push notification status;
+		this.authySecuredDoorLocation = authySecuredDoorLocation;
+	}
+	
 }

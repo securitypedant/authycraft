@@ -87,7 +87,7 @@ public class AuthyAPI {
 	 * 
 	 * @param strAuthyID
 	 */
-	public final void requestAuthySMSToken (String strAuthyID, Boolean bForce) {
+	public final boolean requestAuthySMSToken (String strAuthyID, Boolean bForce) {
 		// When the Authy mobile app is being used, by default SMS messages cannot be sent.
 		// This can be overridden.
 		Map<String, String> options = new HashMap<String, String>();
@@ -104,11 +104,13 @@ public class AuthyAPI {
 	
 		if (response.isOk()) {
 			// User successfully deleted
+			return true;
 		}
 		else {
 			// Problem deleting user.
 			Error error = response.getError();
 			System.out.println(error.getMessage());
+			return false;
 		}
 	}
 	
@@ -118,7 +120,7 @@ public class AuthyAPI {
 	 * 
 	 * @param strAuthyID
 	 */
-	public final void requestAuthyVoiceToken (String strAuthyID, Boolean bForce) {
+	public final boolean requestAuthyVoiceToken (String strAuthyID, Boolean bForce) {
 		// When the Authy mobile app is being used, by default SMS messages cannot be sent.
 		// This can be overridden.
 		Map<String, String> options = new HashMap<String, String>();
@@ -135,11 +137,13 @@ public class AuthyAPI {
 	
 		if (response.isOk()) {
 			// Voice call successfully started.
+			return true;
 		}
 		else {
 			// Problem initiating voice call.
 			Error error = response.getError();
 			System.out.println(error.getMessage());
+			return false;
 		}
 	}
 	

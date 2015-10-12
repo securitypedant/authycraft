@@ -13,24 +13,34 @@ import cpw.mods.fml.relauncher.Side;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayer;
 
-public class AuthyReqSMSPacket implements IMessage
+public class AuthyReqTokenPacket implements IMessage
 {
 	// Needs a default constructor.
-	public AuthyReqSMSPacket() { }
+	public AuthyReqTokenPacket() {
+		// Default to SMS for Authy token delivery.
+		this.tokenMethod = "sms";
+	}
+	private String tokenMethod;
+	
+	public AuthyReqTokenPacket (String tokenMethod) {
+		this.tokenMethod = tokenMethod;
+	}
 
     @Override
     public void fromBytes(ByteBuf buf) {
     	// Read the Authy token from the buffer 
+    	tokenMethod = ByteBufUtils.readUTF8String(buf); 	
     }
 
     @Override
     public void toBytes(ByteBuf buf) {
     	// Write the Authy token to the buffer
+        ByteBufUtils.writeUTF8String(buf, tokenMethod);    	
     }
 
-	public static class AuthyReqSMSPacketHandler implements IMessageHandler<AuthyReqSMSPacket, IMessage> {
+	public static class AuthyReqTokenPacketHandler implements IMessageHandler<AuthyReqTokenPacket, IMessage> {
 		@Override
-		public IMessage onMessage(AuthyReqSMSPacket message, MessageContext ctx) {
+		public IMessage onMessage(AuthyReqTokenPacket message, MessageContext ctx) {
 			// Get the player we want to auth the code for. 
 			EntityPlayer player = SecondFactor.proxy.getPlayerFromMessageContext(ctx);
 			// We need the player's extended properties so we can get their Authy ID
@@ -39,12 +49,14 @@ public class AuthyReqSMSPacket implements IMessage
 			if (!props.getAuthyCell().equals("")) {
 				 String strAuthyID = props.getAuthyID();		
 				 // If they are registered, we should have a valid AuthyID stored.
-		          
-	            // TODO: Ideally put a try around this to catch any problems with communicating to Authy.
-				AuthyAPI authyAPI = new AuthyAPI();
-				authyAPI.requestAuthyVoiceToken(strAuthyID, true);			
+				 AuthyAPI authyAPI = new AuthyAPI();
+		         // TODO: Ideally put a try around this to catch any problems with communicating to Authy.
+				 if (message.tokenMethod.toLowerCase().equals("sms")) {
+					 boolean tokenSuccess = authyAPI.requestAuthySMSToken(strAuthyID, true);
+				 } else if (message.tokenMethod.toLowerCase().equals("voice")) {
+					 boolean tokenSuccess = authyAPI.requestAuthyVoiceToken(strAuthyID, true);
+				 }			
 			}
-				
 			return null; // no response in this case
 		}   
 	}

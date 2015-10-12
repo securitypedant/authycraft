@@ -81,7 +81,7 @@ public class AuthyVerify extends CommandBase {
 			} else {
 				// To few or too many arguments passed.
 				System.out.println("[AUTHY CRAFT] Incorrect arguments sent for command /atreg");
-				player.addChatComponentMessage(new ChatComponentText("Incorrect use of command, /atcode <authy token>"));
+				player.addChatComponentMessage(new ChatComponentText("Incorrect use of command, /atverify <authy token>"));
 			}
 	  }
 

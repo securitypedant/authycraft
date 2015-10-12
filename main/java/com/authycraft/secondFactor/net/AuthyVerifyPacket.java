@@ -15,11 +15,10 @@ import net.minecraft.entity.player.EntityPlayerMP;
 
 public class AuthyVerifyPacket implements IMessage {
 	
-	public static CommonProxy proxy = new CommonProxy();
+	private static CommonProxy proxy = new CommonProxy();
 	
 	// Needs a default constructor.
 	public AuthyVerifyPacket() { }
-	
 	private String authyToken;
 	
 	public AuthyVerifyPacket(String authyToken) {
@@ -56,6 +55,10 @@ public class AuthyVerifyPacket implements IMessage {
 				if (tokenSuccess) {
 					// Code was correct, tell client to close Gui.
 					System.out.println("Was able to verify Authy token from Gui for " + player.getDisplayName());
+					// Close the GUI and let them in...
+					props.setPlayerAwaitingAuthy(false);
+					props.setPushRequestStatus("");
+					props.setpushRequestUUID("");
 					proxy.network.sendTo(new AuthyShow2FAGuiPacket(0), (EntityPlayerMP) player);
 				}
 				

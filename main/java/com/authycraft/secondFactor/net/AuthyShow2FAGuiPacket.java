@@ -13,9 +13,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.World;
 
-public class AuthyShow2FAGuiPacket implements IMessage {
-	// public static CommonProxy proxy = new CommonProxy();
-	
+public class AuthyShow2FAGuiPacket implements IMessage {	
 	// Needs a default constructor.
 	public AuthyShow2FAGuiPacket() { }
 	
@@ -46,7 +44,7 @@ public class AuthyShow2FAGuiPacket implements IMessage {
 			
 			int openGui = message.showAuthyGui;
 			if (openGui == 1) {
-				player.openGui(SecondFactor.instance, 0, player.worldObj, (int) player.posX, (int) player.posY, (int) player.posZ);		
+				player.openGui(SecondFactor.instance, 0, player.worldObj, (int) player.posX, (int) player.posY, (int) player.posZ);
 			} else {
 				// We need to close the gui for the player.
 				player.closeScreen();

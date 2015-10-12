@@ -7,6 +7,7 @@ import net.minecraft.world.World;
 public class AuthyGuiHandler implements IGuiHandler {
 	
 	public static final int AUTHYGUI = 0;
+	public static final int AUTHYDOORGUI = 1;
 
 	@Override
 	public Object getServerGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) {
@@ -15,8 +16,11 @@ public class AuthyGuiHandler implements IGuiHandler {
 
 	@Override
 	public Object getClientGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) {
-		if (ID == AUTHYGUI)
+		if (ID == AUTHYGUI) {
 			return new AuthyGui();
+		} else if (ID == AUTHYDOORGUI) {
+			return new AuthyDoorGui();
+		}
 		return null;
 	}
 
